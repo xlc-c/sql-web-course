@@ -76,3 +76,4 @@ def gen_sales_sql():
 if __name__ == '__main__':
     s, nc, no, ni = gen_sales_sql()
     print(f"customers={nc} orders={no} items={ni} len={len(s)}")
+    open('/mnt/agents/build/sales_init.sql', 'w', encoding='utf-8').write(s)

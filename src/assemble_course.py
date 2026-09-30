@@ -78,7 +78,7 @@ s = L('sandbox')
 s['html'] = s['html'].replace('四张表的结构', '两套数据 · 八张表的结构')
 s['html'] = s['html'].replace(
   '<p>忘记表里有什么？运行',
-  '<p><strong>第二套：销售业务数据</strong>（从第三篇起加入练习）</p>' + SCHEMA2_HTML + '<p>忘记表里有什么')
+  '<p><strong>第二套：销售业务数据</strong>（从第三篇起加入练习）</p>' + SCHEMA2_HTML + '<p>忘记表里有什么？运行')
 s['html'] = s['html'].replace(
   '<li>把课里的练习换个条件重做一遍（换个种属、换个日期区间）</li>',
   '<li>把课里的练习换个条件重做一遍（换个种属、换个年份、换个类别）</li>\n<li>第五篇学完后，可以在沙盒里随便 INSERT / UPDATE / DELETE——玩坏了点下方「重置练习数据」一键还原</li>')
