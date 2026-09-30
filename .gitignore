@@ -1,0 +1,6 @@
+dist/
+src/course_final.json
+src/sql-wasm.js
+src/sql-wasm.wasm
+src/sql-wasm.wasm.b64
+__pycache__/
