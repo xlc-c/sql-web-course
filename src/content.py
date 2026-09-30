@@ -109,7 +109,7 @@ LESSONS_SQL = [
 <tr><td><code>LIKE '模式'</code></td><td>模糊匹配，<code>%</code> 代表任意内容</td><td><code>tattoo LIKE '24%'</code>（24 开头）</td></tr>
 </tbody>
 </table>
-<div class="callout"><b>AND 和 OR 混用时</b>，AND 优先执行，容易出错。保险做法：用括号明确分组，例如 <code class="inl">(species='比格犬' OR species='巴马猪') AND weight_kg &gt; 5</code>。</div>
+<div class="callout"><b>AND 和 OR 混用时</b>，AND 优先执行，容易出错。保险做法：用括号明确分组，例如 <code class="inl">(species='比格犬' OR species='巴马猪') AND weight_kg > 5</code>。</div>
 """ + demo("d2a", "示例 · 2024 年到货的动物", "SELECT tattoo, species, arrival_date FROM animals WHERE arrival_date BETWEEN '2024-01-01' AND '2024-12-31' LIMIT 10;")
  + demo("d2b", "示例 · 犬和猪里的中等体重", "SELECT tattoo, species, weight_kg FROM animals WHERE species IN ('比格犬','巴马猪') AND weight_kg BETWEEN 8 AND 20;")),
  "exercises": [
