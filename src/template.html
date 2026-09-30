@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL 自学课 · 网页版</title>
+<style>
+:root{
+  --paper:#fafafa; --ink:#0a0a0a; --ink-2:#262626; --ink-3:#525252; --ink-4:#8a8a8a;
+  --line:#e5e5e5; --accent:#ff8528; --accent-soft:#fff3e9; --ok:#1a7f37; --bad:#c0392b;
+  --bench:#101010; --bench-line:#2a2a2a;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC",sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,"Courier New",monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:#fff}
+
+/* ---------- 布局 ---------- */
+#app{display:flex;min-height:100vh}
+aside{width:292px;flex-shrink:0;border-right:1px solid var(--line);height:100vh;position:sticky;top:0;overflow-y:auto;background:var(--paper);display:flex;flex-direction:column}
+main{flex:1;min-width:0}
+.wrap{max-width:860px;margin:0 auto;padding:56px 48px 160px}
+
+/* ---------- 侧栏 ---------- */
+.brand{padding:28px 24px 20px;border-bottom:1px solid var(--line)}
+.brand h1{font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.35}
+.brand p{font-size:12.5px;color:var(--ink-3);margin-top:6px;line-height:1.6}
+#progress-outer{padding:16px 24px;border-bottom:1px solid var(--line)}
+#progress-outer .p-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3);margin-bottom:8px;font-variant-numeric:tabular-nums}
+.p-track{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.p-fill{height:100%;background:var(--accent);width:0%;transition:width .7s var(--ease)}
+nav{flex:1;padding:10px 0}
+.nav-group{border-bottom:1px solid var(--line)}
+.nav-group:last-child{border-bottom:none}
+.nav-gtitle{width:100%;text-align:left;background:none;border:none;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink-4);letter-spacing:.14em;padding:14px 24px 8px;cursor:default;text-transform:uppercase}
+.nav-item{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:none;border:none;font-family:var(--sans);font-size:14px;color:var(--ink-2);padding:9px 24px;cursor:pointer;line-height:1.5;transition:color .2s}
+.nav-item:hover{color:var(--accent)}
+.nav-item.active{color:var(--ink);font-weight:600;background:linear-gradient(90deg,var(--accent-soft),transparent 70%)}
+.nav-item .num{font-family:var(--mono);font-size:11.5px;color:var(--ink-4);flex-shrink:0;width:22px}
+.nav-item.active .num{color:var(--accent)}
+.nav-item .done-dot{margin-left:auto;flex-shrink:0;width:15px;height:15px;border-radius:50%;border:1.5px solid var(--line);align-self:center;transition:all .3s}
+.nav-item.completed .done-dot{background:var(--ok);border-color:var(--ok);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.5l2.4 2.4 4.6-5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-size:10px;background-position:center;background-repeat:no-repeat}
+.side-tools{padding:16px 24px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+.side-tools button{font-family:var(--sans);font-size:12px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink-3);cursor:pointer;transition:all .2s}
+.side-tools button:hover{border-color:var(--ink-3);color:var(--ink)}
+
+/* ---------- 正文 ---------- */
+.crumb{font-family:var(--mono);font-size:12px;color:var(--ink-4);letter-spacing:.08em;margin-bottom:14px}
+.lesson-title{font-size:30px;font-weight:700;letter-spacing:-.015em;line-height:1.3;margin-bottom:8px}
+.lesson-sub{font-size:15px;color:var(--ink-3);margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+section.blk{margin-bottom:36px;opacity:0;filter:blur(6px);transform:translateY(10px);transition:opacity .7s var(--ease),filter .7s var(--ease),transform .7s var(--ease)}
+section.blk.in{opacity:1;filter:blur(0);transform:none}
+@media (prefers-reduced-motion:reduce){section.blk{opacity:1;filter:none;transform:none;transition:none}}
+h3{font-size:17px;font-weight:700;margin-bottom:12px;display:flex;align-items:baseline;gap:10px}
+h3 .h-num{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:500}
+p{margin-bottom:14px;color:var(--ink-2)}
+p:last-child{margin-bottom:0}
+strong{font-weight:700;color:var(--ink)}
+ul.plain{padding-left:1.4em;margin-bottom:14px}
+ul.plain li{margin-bottom:6px;color:var(--ink-2)}
+ul.plain li::marker{color:var(--accent)}
+.callout{border:1px solid var(--line);border-left:2px solid var(--accent);background:#fff;padding:14px 18px;font-size:14.5px;color:var(--ink-2);margin-bottom:16px}
+.callout b{color:var(--ink)}
+code.inl{font-family:var(--mono);font-size:.88em;background:#fff;border:1px solid var(--line);padding:1px 6px;border-radius:4px;color:var(--ink);white-space:nowrap}
+table.ref{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px;background:#fff}
+table.ref th,table.ref td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+table.ref th{background:var(--paper);font-weight:600;font-size:13px;color:var(--ink-3)}
+table.ref td code{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+
+/* ---------- 代码工作台（深色） ---------- */
+.bench{background:var(--bench);color:#e8e8e8;border-radius:10px;overflow:hidden;margin-bottom:20px}
+.bench-head{display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid var(--bench-line);gap:12px}
+.bench-head .dots{display:flex;gap:6px}
+.bench-head .dots i{width:9px;height:9px;border-radius:50%;background:#2e2e30;display:block}
+.bench-head .b-label{font-family:var(--mono);font-size:11.5px;color:#8a8a8a;letter-spacing:.08em}
+.bench-head .spacer{flex:1}
+pre.code{padding:16px 18px;font-family:var(--mono);font-size:13.5px;line-height:1.7;overflow-x:auto;white-space:pre;color:#e8e8e8}
+pre.code .kw{color:var(--accent)}
+pre.code .cm{color:#6b6b6b}
+textarea.code-input{width:100%;min-height:110px;background:var(--bench);color:#e8e8e8;border:none;outline:none;padding:16px 18px;font-family:var(--mono);font-size:13.5px;line-height:1.7;resize:vertical;display:block}
+textarea.code-input:focus{box-shadow:inset 0 0 0 1px #3a3a3a}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:7px 18px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:all .25s var(--ease);white-space:nowrap}
+.btn-run{background:var(--accent);color:#0a0a0a}
+.btn-run:hover{background:#ff9a4d}
+.btn-ghost{background:transparent;color:#bdbdbd;border-color:#3a3a3a}
+.btn-ghost:hover{border-color:#8a8a8a;color:#fff}
+.btn-light{background:#fff;color:var(--ink-2);border-color:var(--line)}
+.btn-light:hover{border-color:var(--ink-3);color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:wait}
+.bench-foot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--bench-line);align-items:center;flex-wrap:wrap}
+.bench-foot .hint{font-family:var(--mono);font-size:11px;color:#6b6b6b;margin-left:auto}
+
+/* ---------- 结果表 ---------- */
+.result{border-top:1px solid var(--bench-line);max-height:340px;overflow:auto;display:none}
+.result.show{display:block}
+.result table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
+.result th{position:sticky;top:0;background:#1a1a1a;color:#bdbdbd;font-weight:500;text-align:left;padding:8px 14px;border-bottom:1px solid var(--bench-line);white-space:nowrap}
+.result td{padding:6px 14px;border-bottom:1px solid #1e1e1e;color:#d4d4d4;white-space:nowrap}
+.result tr:hover td{background:#181818}
+.result .meta{padding:8px 14px;font-family:var(--mono);font-size:11px;color:#6b6b6b;border-bottom:1px solid var(--bench-line)}
+.result .err{padding:14px 18px;color:#ff8a7a;font-size:13px;line-height:1.7}
+.result .err b{color:#ffb0a3}
+.result .empty{padding:14px 18px;color:#8a8a8a;font-size:13px}
+
+/* ---------- 判题反馈 ---------- */
+.judge{display:none;padding:13px 18px;border-top:1px solid var(--bench-line);font-size:14px;line-height:1.7}
+.judge.show{display:block}
+.judge.pass{color:#7dd87d}
+.judge.fail{color:#ff9a8a}
+details.ans{border-top:1px solid var(--bench-line)}
+details.ans summary{cursor:pointer;padding:11px 16px;font-size:12.5px;color:#8a8a8a;list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+details.ans summary::before{content:"▸";font-size:10px;transition:transform .25s}
+details.ans[open] summary::before{transform:rotate(90deg)}
+details.ans summary:hover{color:#e8e8e8}
+.ex-title{font-size:15px;font-weight:700;margin:0 0 6px;display:flex;gap:10px;align-items:baseline}
+.ex-title .tag{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.05em}
+.ex-desc{font-size:14.5px;color:var(--ink-2);margin-bottom:14px}
+.ex-desc code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--line);padding:0 5px;border-radius:4px}
+
+/* ---------- 底部 pill 导航 ---------- */
+#pillnav{position:fixed;bottom:22px;left:50%;transform:translateX(calc(-50% + 146px));display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px;box-shadow:6px 2px 24px rgba(0,0,0,.12);z-index:50;align-items:center}
+#pillnav button{font-family:var(--sans);font-size:13px;border:none;background:none;padding:8px 16px;border-radius:999px;cursor:pointer;color:var(--ink-2);transition:all .2s;white-space:nowrap}
+#pillnav button:hover{background:var(--paper);color:var(--ink)}
+#pillnav .btn-done{background:var(--ink);color:#fff;font-weight:600}
+#pillnav .btn-done:hover{background:#2a2a2a}
+#pillnav .btn-done.is-done{background:var(--ok)}
+#menu-btn{display:none;position:fixed;top:14px;left:14px;z-index:60;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-family:var(--sans);font-size:13px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+
+/* ---------- 滚动条 ---------- */
+aside::-webkit-scrollbar,.result::-webkit-scrollbar,pre.code::-webkit-scrollbar{width:8px;height:8px}
+aside::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.result::-webkit-scrollbar-thumb,pre.code::-webkit-scrollbar-thumb{background:#2e2e30;border-radius:4px}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:900px){
+  aside{position:fixed;left:0;top:0;z-index:55;transform:translateX(-100%);transition:transform .35s var(--ease);box-shadow:8px 0 30px rgba(0,0,0,.1)}
+  aside.open{transform:none}
+  #menu-btn{display:block}
+  .wrap{padding:64px 22px 150px}
+  #pillnav{transform:translateX(-50%)}
+  .lesson-title{font-size:24px}
+}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13px;padding:10px 22px;border-radius:999px;opacity:0;pointer-events:none;transition:all .4s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#boot{position:fixed;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:100;transition:opacity .5s}
+#boot .b-title{font-size:15px;font-weight:600}
+#boot .b-sub{font-family:var(--mono);font-size:12px;color:var(--ink-4)}
+#boot .bar{width:180px;height:2px;background:var(--line);overflow:hidden;border-radius:2px}
+#boot .bar i{display:block;height:100%;width:40%;background:var(--accent);animation:slide 1.1s infinite var(--ease)}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(280%)}}
+</style>
+</head>
+<body>
+<div id="boot"><div class="b-title">SQL 自学课</div><div class="bar"><i></i></div><div class="b-sub" id="boot-msg">正在载入数据库引擎…</div></div>
+<button id="menu-btn">☰ 课程目录</button>
+<div id="app">
+<aside>
+  <div class="brand">
+    <h1>SQL 自学课<span style="color:var(--accent)">.</span></h1>
+    <p>网页内运行 · 自动判题 · 无需安装<br>数据存本地，关闭即走</p>
+  </div>
+  <div id="progress-outer">
+    <div class="p-label"><span>学习进度</span><span id="p-text">0 / 0</span></div>
+    <div class="p-track"><div class="p-fill" id="p-fill"></div></div>
+  </div>
+  <nav id="nav"></nav>
+  <div class="side-tools">
+    <button id="btn-export" title="把学习进度导出为文件">导出进度</button>
+    <button id="btn-import" title="从文件恢复学习进度">导入进度</button>
+    <button id="btn-reset" title="清空本机的全部学习记录">清空记录</button>
+  </div>
+</aside>
+<main><div class="wrap" id="content"></div></main>
+</div>
+<div id="pillnav">
+  <button id="nav-prev">← 上一课</button>
+  <button class="btn-done" id="nav-done">标记完成</button>
+  <button id="nav-next">下一课 →</button>
+</div>
+<div id="toast"></div>
+<input type="file" id="import-file" accept=".json" style="display:none">
+<script>/*__SQLJS__*/</script>
+<script>
+"use strict";
+const WASM_B64 = "__WASM_B64__";
+const INIT_SQL = __INIT_SQL__;
+const COURSE = __COURSE_JSON__;
+</script>
+<script>/*__APP_JS__*/</script>
+</body>
+</html>
